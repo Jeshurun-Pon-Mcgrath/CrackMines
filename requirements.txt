@@ -1,0 +1,5 @@
+Flask==3.0.0
+Flask-MySQLdb==2.0.0
+Flask-Mail==0.9.1
+mysqlclient==2.2.0
+gunicorn==21.2.0
