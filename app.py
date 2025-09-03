@@ -1,31 +1,39 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
-import MySQLdb.cursors
-import re, random
+import mysql.connector, re, random, os
 
 app = Flask(__name__)
 app.secret_key = 'replace_with_a_secure_random_secret'
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '12345'
-app.config['MYSQL_DB'] = 'crackmines'
+# ✅ TiDB Cloud DB Connection Function
+def get_db():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST"),
+        port=4000,
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        ssl_ca="isrgrootx1.pem",   # CA cert you must include in your project folder
+        ssl_verify_cert=True,
+        ssl_verify_identity=True
+    )
 
-mysql = MySQL(app)
-
+# ✅ Flask-Mail config (use Gmail app password)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'crackmines34@gmail.com'
-app.config['MAIL_PASSWORD'] = 'xjll wtxs kzjd tkxy'
+app.config['MAIL_PASSWORD'] = 'xjll wtxs kzjd tkxy'  # Gmail App password
 
 mail = Mail(app)
 
 def user_by_email(email):
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("SELECT * FROM users WHERE email=%s", (email,))
-    return cur.fetchone()
+    account = cur.fetchone()
+    db.close()
+    return account
 
 def ensure_login():
     return 'loggedin' in session
@@ -40,7 +48,8 @@ def login():
     if request.method == 'POST':
         email = request.form['email'].strip().lower()
         password = request.form['password']
-        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        db = get_db()
+        cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM users WHERE email=%s AND password=%s", (email,password))
         account = cur.fetchone()
         if not account:
@@ -52,18 +61,21 @@ def login():
                 session['name'] = account['name']
                 session['email'] = account['email']
                 session['role'] = 'teacher'
+                db.close()
                 return redirect(url_for('dashboard'))
             else:
                 otp = str(random.randint(100000, 999999))
                 cur.execute("UPDATE users SET otp=%s WHERE id=%s", (otp, account['id']))
-                mysql.connection.commit()
+                db.commit()
                 try:
                     m = Message('CrackMines Login OTP', sender=app.config['MAIL_USERNAME'], recipients=[email])
                     m.body = f"Your OTP is {otp}. It is valid for 10 minutes."
                     mail.send(m)
                 except Exception as e:
                     print("MAIL ERROR:", e)
+                db.close()
                 return redirect(url_for('verify_otp_login', email=email))
+        db.close()
     return render_template('login.html', msg=msg)
 
 @app.route('/signup', methods=['GET','POST'])
@@ -80,21 +92,24 @@ def signup():
         else:
             domain = email.split('@')[-1]
             role = 'teacher' if domain == 'karunya.edu' else 'student'
-            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            db = get_db()
+            cur = db.cursor(dictionary=True)
             if role == 'student':
                 otp = str(random.randint(100000,999999))
                 cur.execute("INSERT INTO users(name,email,password,role,otp) VALUES(%s,%s,%s,%s,%s)", (name,email,password,role,otp))
-                mysql.connection.commit()
+                db.commit()
                 try:
                     m = Message('CrackMines OTP', sender=app.config['MAIL_USERNAME'], recipients=[email])
                     m.body = f"Welcome {name}! Your OTP is {otp}."
                     mail.send(m)
                 except Exception as e:
                     print("MAIL ERROR:", e)
+                db.close()
                 return redirect(url_for('verify_otp', email=email))
             else:
                 cur.execute("INSERT INTO users(name,email,password,role) VALUES(%s,%s,%s,%s)", (name,email,password,role))
-                mysql.connection.commit()
+                db.commit()
+                db.close()
                 flash("Teacher account created. Please login.")
                 return redirect(url_for('login'))
     return render_template('signup.html', msg=msg)
@@ -104,14 +119,17 @@ def verify_otp(email):
     msg = ''
     if request.method == 'POST':
         otp = request.form['otp']
-        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        db = get_db()
+        cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM users WHERE email=%s AND otp=%s", (email, otp))
         acc = cur.fetchone()
         if acc:
             cur.execute("UPDATE users SET otp=NULL WHERE id=%s", (acc['id'],))
-            mysql.connection.commit()
+            db.commit()
+            db.close()
             flash("OTP verified. Please login.")
             return redirect(url_for('login'))
+        db.close()
         msg = "Wrong OTP"
     return render_template('verify_otp.html', email=email, msg=msg)
 
@@ -120,18 +138,21 @@ def verify_otp_login(email):
     msg = ''
     if request.method == 'POST':
         otp = request.form['otp']
-        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        db = get_db()
+        cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM users WHERE email=%s AND otp=%s", (email, otp))
         acc = cur.fetchone()
         if acc:
             cur.execute("UPDATE users SET otp=NULL WHERE id=%s", (acc['id'],))
-            mysql.connection.commit()
+            db.commit()
             session['loggedin'] = True
             session['id'] = acc['id']
             session['name'] = acc['name']
             session['email'] = acc['email']
             session['role'] = acc['role']
+            db.close()
             return redirect(url_for('dashboard'))
+        db.close()
         msg = "Wrong OTP"
     return render_template('verify_otp.html', email=email, msg=msg)
 
@@ -176,7 +197,8 @@ def logout():
 
 @app.route('/api/leaderboard')
 def api_leaderboard():
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("""
         SELECT u.name, MAX(s.score) AS score
         FROM scores s
@@ -186,15 +208,18 @@ def api_leaderboard():
         LIMIT 10
     """)
     rows = cur.fetchall()
+    db.close()
     return jsonify(rows)
 
 @app.route('/api/stats')
 def api_stats():
     if not ensure_login(): return jsonify({'error':'not logged in'}), 401
     uid = session['id']
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("SELECT COUNT(*) as taken, COALESCE(AVG(score),0) as avg_score, COALESCE(MAX(score),0) as best FROM scores WHERE user_id=%s", (uid,))
     row = cur.fetchone()
+    db.close()
     return jsonify(row)
 
 @app.route('/api/quizzes', methods=['POST'])
@@ -204,16 +229,18 @@ def api_create_quiz():
     data = request.get_json()
     title = data.get('title')
     questions = data.get('questions', [])
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    db = get_db()
+    cur = db.cursor(dictionary=True)
     cur.execute("INSERT INTO quizzes(title, teacher_id) VALUES(%s,%s)", (title, session['id']))
-    mysql.connection.commit()
+    db.commit()
     quiz_id = cur.lastrowid
     for q in questions:
         cur.execute("""
             INSERT INTO questions(quiz_id,question_text,option_a,option_b,option_c,option_d,correct_answer)
             VALUES(%s,%s,%s,%s,%s,%s,%s)
         """, (quiz_id, q['text'], q['A'], q['B'], q['C'], q['D'], q['correct']))
-    mysql.connection.commit()
+    db.commit()
+    db.close()
     return jsonify({'ok': True, 'quiz_id': quiz_id})
 
 if __name__ == "__main__":
