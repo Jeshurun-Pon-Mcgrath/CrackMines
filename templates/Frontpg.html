@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero">
+  <h1>Welcome to CrackMines Quiz Platform 🎯</h1>
+  <p>Test your knowledge and compete with friends!</p>
+  <div class="cta">
+    <a class="btn" href="{{ url_for('login') }}">Login</a>
+    <a class="btn outline" href="{{ url_for('signup') }}">Signup</a>
+  </div>
+</div>
+{% endblock %}

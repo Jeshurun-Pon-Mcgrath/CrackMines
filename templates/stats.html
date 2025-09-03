@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Your Stats</h2>
+  <ul id="stats-list"><li>Loading…</li></ul>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/stats'); const data = await res.json();
+    const el = document.getElementById('stats-list');
+    el.innerHTML = `<li>Total Quizzes Taken: ${data.taken}</li>
+                    <li>Average Score: ${Math.round(data.avg_score)}%</li>
+                    <li>Best Score: ${data.best}%</li>`;
+  } catch(e){ console.error(e); }
+});
+</script>
+{% endblock %}

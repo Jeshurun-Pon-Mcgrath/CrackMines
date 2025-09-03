@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Home</h2>
+  <p>Quick links:</p>
+  <div class="grid-2">
+    <a class="linkcard" href="{{ url_for('stats') }}">📊 Your Stats</a>
+    <a class="linkcard" href="{{ url_for('leaderboard') }}">🏆 Leaderboard</a>
+    {% if session.get('role') == 'teacher' %}
+      <a class="linkcard" href="{{ url_for('createquiz') }}">📝 Create Quiz</a>
+    {% endif %}
+    <a class="linkcard" href="{{ url_for('livequiz') }}">🎮 Live Quiz</a>
+  </div>
+</div>
+{% endblock %}

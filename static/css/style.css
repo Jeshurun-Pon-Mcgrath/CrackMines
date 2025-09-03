@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box} body{margin:0;font-family:Poppins,system-ui;background:#f7f9fb;color:#333}
+.sidebar{width:220px;background:#800040;color:#fff;position:fixed;top:0;bottom:0;padding:20px}
+.sidebar h2{font-size:22px;margin-bottom:30px;text-align:center}
+.sidebar a{display:block;color:#fff;margin:12px 0;text-decoration:none;padding:10px 14px;border-radius:8px;transition:.2s}
+.sidebar a:hover{background:#9d0a54}
+.main-area{margin-left:220px;width:calc(100% - 220px)}
+.navbar{display:flex;justify-content:space-between;align-items:center;background:#fff3f8;border-bottom:1px solid #f0d5e4;padding:12px 20px;position:sticky;top:0}
+.left-nav{display:flex;align-items:center;gap:12px}
+.menu-icon{font-size:20px}
+.site-title{font-size:22px;font-weight:600;color:#800040}
+.nav-right a{margin-left:12px;text-decoration:none;color:#800040;font-weight:600}
+.nav-right .btn{background:#800040;color:#fff;padding:8px 12px;border-radius:10px}
+.user-pill{background:#fff;border:1px solid #eee;padding:6px 10px;border-radius:999px}
+.main-content{padding:22px}
+.hero{background:#fff;border-radius:16px;padding:40px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.cta .btn{margin:10px;display:inline-block;background:#800040;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none}
+.cta .btn.outline{background:transparent;border:2px solid #800040;color:#800040}
+.card{background:#fff;padding:22px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.05);margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.linkcard{display:block;padding:18px;border-radius:12px;background:#fff6fb;border:1px solid #ffe0f1;text-decoration:none;color:#800040;font-weight:600}
+.form label{font-weight:600;margin-top:12px;display:block}
+.form input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;margin:6px 0 10px}
+.btn{background:#800040;color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+.hint{font-size:12px;color:#666}
+.error{color:#b00020;margin-top:8px}
+.flash>div{background:#e9ffe9;border:1px solid #b3f0b3;padding:8px;border-radius:10px;margin-bottom:8px}
+.lb-list{margin-top:14px}
+@media(max-width:768px){.sidebar{display:none}.main-area{margin-left:0;width:100%}}
