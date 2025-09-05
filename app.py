@@ -3,19 +3,27 @@ from flask_mail import Mail, Message
 import mysql.connector
 import re, random, os
 
-app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "replace_with_a_secure_random_secret")
+from dotenv import load_dotenv
 
-# ✅ Database connection (TiDB / PlanetScale)
+# Load .env file
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "replace_with_secure_key")
+
+# Database connection
 def get_db():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", "4000")),
+        port=os.getenv("DB_PORT"),
         user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
+        password=os.getenv("DB_PASSWORD"),   # ✅ Added this
         database=os.getenv("DB_NAME"),
-        ssl_ca=os.getenv("DB_SSL_CA")  # only ssl_ca, no match_hostname
+        ssl_ca=os.getenv("DB_SSL_CA"),
+        ssl_verify_cert=True,
+        ssl_verify_identity=True
     )
+
 
 # ✅ Mail config (with your password)
 app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
