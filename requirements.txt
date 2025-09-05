@@ -1,4 +1,4 @@
-Flask==2.3.2
+Flask==3.0.3
 Flask-Mail==0.9.1
+mysql-connector-python==9.0.0
 gunicorn==21.2.0
-mysql-connector-python==8.1.0
