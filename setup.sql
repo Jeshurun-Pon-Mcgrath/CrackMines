@@ -1,32 +1,37 @@
+-- Create and switch to the database
+CREATE DATABASE IF NOT EXISTS test;
+USE test;
 
-CREATE DATABASE IF NOT EXISTS crackmines;
-USE crackmines;
-
+-- Drop existing tables to avoid conflicts
 DROP TABLE IF EXISTS scores;
 DROP TABLE IF EXISTS questions;
 DROP TABLE IF EXISTS quizzes;
 DROP TABLE IF EXISTS users;
 
+-- Users table (with optional OTP)
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  email VARCHAR(100) UNIQUE,
-  password VARCHAR(100),
-  role ENUM('teacher','student'),
-  otp VARCHAR(10)
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('student','teacher') NOT NULL,
+  otp VARCHAR(6) NULL
 );
 
+-- Quizzes table
 CREATE TABLE quizzes (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(150),
+  title VARCHAR(255) NOT NULL,
   teacher_id INT,
-  FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- Questions table
 CREATE TABLE questions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   quiz_id INT,
-  question_text TEXT,
+  question_text TEXT NOT NULL,
   option_a VARCHAR(255),
   option_b VARCHAR(255),
   option_c VARCHAR(255),
@@ -35,19 +40,18 @@ CREATE TABLE questions (
   FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
+-- Scores table
 CREATE TABLE scores (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
   quiz_id INT,
   score INT,
+  taken_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
-INSERT INTO users(name,email,password,role) VALUES
-('Teacher Demo','teacher@karunya.edu','teacher123','teacher'),
-('Student Demo','student@karunya.edu.in','student123','student');
-
-INSERT INTO quizzes(title, teacher_id) VALUES ('Sample Quiz', 1);
-INSERT INTO scores(user_id, quiz_id, score) VALUES
-(2,1,88),(2,1,92);
+-- Demo teacher & student accounts
+INSERT IGNORE INTO users (name, email, password, role) VALUES
+('Demo Teacher', 'demo@karunya.edu', 'teacher123', 'teacher'),
+('Demo Student', 'demo@karunya.edu.in', 'student123', 'student');

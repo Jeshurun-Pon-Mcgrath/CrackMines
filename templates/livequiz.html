@@ -1,7 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Quiz</title>
+</head>
+<body>
   <h2>Live Quiz</h2>
-  <p>Join or host a real-time quiz competition with friends! (coming soon)</p>
-</div>
+  <form method="POST">
+    {% for q in questions %}
+      <p><b>Q{{ loop.index }}: {{ q.question_text }}</b></p>
+      <label><input type="radio" name="{{ q.id }}" value="A"> {{ q.option_a }}</label><br>
+      <label><input type="radio" name="{{ q.id }}" value="B"> {{ q.option_b }}</label><br>
+      <label><input type="radio" name="{{ q.id }}" value="C"> {{ q.option_c }}</label><br>
+      <label><input type="radio" name="{{ q.id }}" value="D"> {{ q.option_d }}</label><br><br>
+    {% endfor %}
+    <button type="submit">Submit Quiz</button>
+  </form>
+</body>
+</html>
+
 {% endblock %}

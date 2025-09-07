@@ -1,15 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Quiz</title>
+</head>
+<body>
   <h2>Create Quiz</h2>
-  <form id="quizMetaForm" class="form">
-    <label>Quiz Title</label>
-    <input type="text" id="quizTitle" required>
-    <label>How many questions?</label>
-    <input type="number" id="qCount" min="1" max="50" value="5" required>
-    <button type="submit" class="btn">Next</button>
+  <form method="POST">
+    <label>Quiz Title:</label>
+    <input type="text" name="title" required><br><br>
+
+    <div id="questions">
+      <div class="question">
+        <input type="text" name="question" placeholder="Question" required><br>
+        A: <input type="text" name="option_a" required><br>
+        B: <input type="text" name="option_b" required><br>
+        C: <input type="text" name="option_c" required><br>
+        D: <input type="text" name="option_d" required><br>
+        Correct Answer (A/B/C/D): <input type="text" name="answer" maxlength="1" required><br><br>
+      </div>
+    </div>
+
+    <button type="button" onclick="addQuestion()">Add Another Question</button><br><br>
+    <button type="submit">Save Quiz</button>
   </form>
 
-  <form id="questionsForm" class="form" style="display:none;"></form>
-</div>
+  <script>
+    function addQuestion() {
+      const div = document.createElement("div");
+      div.classList.add("question");
+      div.innerHTML = `
+        <input type="text" name="question" placeholder="Question" required><br>
+        A: <input type="text" name="option_a" required><br>
+        B: <input type="text" name="option_b" required><br>
+        C: <input type="text" name="option_c" required><br>
+        D: <input type="text" name="option_d" required><br>
+        Correct Answer (A/B/C/D): <input type="text" name="answer" maxlength="1" required><br><br>
+      `;
+      document.getElementById("questions").appendChild(div);
+    }
+  </script>
+</body>
+</html>
+
 {% endblock %}

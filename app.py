@@ -202,7 +202,7 @@ def leaderboard():
     if not ensure_login(): return redirect(url_for('login'))
     return render_template('leaderboard.html')
 
-@app.route('/createquiz')
+"""@app.route('/createquiz')
 def createquiz():
     if not ensure_login(): return redirect(url_for('login'))
     if session.get('role') != 'teacher':
@@ -213,7 +213,70 @@ def createquiz():
 @app.route('/livequiz')
 def livequiz():
     if not ensure_login(): return redirect(url_for('login'))
-    return render_template('livequiz.html')
+    return render_template('livequiz.html')"""
+
+@app.route('/createquiz', methods=['GET','POST'])
+def createquiz():
+    if not ensure_login(): return redirect(url_for('login'))
+    if session.get('role') != 'teacher':
+        flash("Only teachers can create quizzes.")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        teacher_id = session['id']
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("INSERT INTO quizzes (title, teacher_id) VALUES (%s, %s)", (title, teacher_id))
+        quiz_id = cur.lastrowid
+
+        # Save questions
+        questions = request.form.getlist('question')
+        options_a = request.form.getlist('option_a')
+        options_b = request.form.getlist('option_b')
+        options_c = request.form.getlist('option_c')
+        options_d = request.form.getlist('option_d')
+        answers = request.form.getlist('answer')
+
+        for i in range(len(questions)):
+            cur.execute("""
+                INSERT INTO questions (quiz_id, question_text, option_a, option_b, option_c, option_d, correct_answer)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """, (quiz_id, questions[i], options_a[i], options_b[i], options_c[i], options_d[i], answers[i]))
+
+        db.commit()
+        cur.close(); db.close()
+        flash("Quiz created successfully!")
+        return redirect(url_for('dashboard'))
+
+    return render_template('createquiz.html')
+
+
+@app.route('/livequiz/<int:quiz_id>', methods=['GET','POST'])
+def livequiz(quiz_id):
+    if not ensure_login(): return redirect(url_for('login'))
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM questions WHERE quiz_id=%s", (quiz_id,))
+    questions = cur.fetchall()
+
+    if request.method == 'POST':
+        score = 0
+        for q in questions:
+            ans = request.form.get(str(q['id']))
+            if ans == q['correct_answer']:
+                score += 1
+        cur.execute("INSERT INTO scores (user_id, quiz_id, score) VALUES (%s,%s,%s)",
+                    (session['id'], quiz_id, score))
+        db.commit()
+        cur.close(); db.close()
+        flash(f"You scored {score}/{len(questions)}")
+        return redirect(url_for('dashboard'))
+
+    cur.close(); db.close()
+    return render_template('livequiz.html', questions=questions)
+
 
 @app.route('/logout')
 def logout():
