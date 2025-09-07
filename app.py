@@ -11,15 +11,15 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "replace_with_secure_key")
 
-# Database connection
+# ---------------- DB CONNECTION ---------------- #
 def get_db():
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),   # ✅ Added this
-        database=os.getenv("DB_NAME"),
-        ssl_ca=os.getenv("DB_SSL_CA"),
+        host="gateway01.ap-northeast-1.prod.aws.tidbcloud.com",
+        port=4000,
+        user="38WLDceXC5LnnnK.root",
+        password="FQf0w8aEQ3SaNnC5",
+        database="crackmines",
+        ssl_ca="isrgrootx1.pem",
         ssl_verify_cert=True,
         ssl_verify_identity=True
     )
