@@ -278,6 +278,19 @@ def livequiz(quiz_id):
     return render_template('livequiz.html', questions=questions)
 
 
+@app.route('/quizzes')
+def quizzes():
+    if not ensure_login(): 
+        return redirect(url_for('login'))
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM quizzes")
+    quizzes = cur.fetchall()
+    cur.close(); db.close()
+    return render_template('quizzes.html', quizzes=quizzes)
+
+
+
 @app.route('/logout')
 def logout():
     session.clear()

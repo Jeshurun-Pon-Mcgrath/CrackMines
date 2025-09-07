@@ -9,7 +9,7 @@
     {% if session.get('role') == 'teacher' %}
       <a class="linkcard" href="{{ url_for('createquiz') }}">📝 Create Quiz</a>
     {% endif %}
-    <a class="linkcard" href="{{ url_for('livequiz') }}">🎮 Live Quiz</a>
+    <a href="{{ url_for('quizzes') }}">🎮 Live Quiz</a>
   </div>
 </div>
 {% endblock %}
