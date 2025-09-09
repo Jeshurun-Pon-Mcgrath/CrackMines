@@ -2,14 +2,18 @@
 {% block content %}
 <div class="card">
   <h2>Available Quizzes</h2>
-  <ul>
-    {% for quiz in quizzes %}
-      <li>
-        <a href="{{ url_for('livequiz', quiz_id=quiz.id) }}">{{ quiz.title }}</a>
-      </li>
-    {% else %}
-      <li>No quizzes available yet.</li>
-    {% endfor %}
-  </ul>
+
+  {% if quizzes %}
+    <ul class="quiz-list">
+      {% for quiz in quizzes %}
+        <li>
+          <strong>{{ quiz.title }}</strong> by Teacher ID {{ quiz.teacher_id }}
+          <a class="btn" href="{{ url_for('livequiz', quiz_id=quiz.id) }}">Take Quiz</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No quizzes available yet.</p>
+  {% endif %}
 </div>
 {% endblock %}

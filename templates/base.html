@@ -1,56 +1,36 @@
-{% set logged = session.get('loggedin', False) %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CrackMines</title>
-  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Dashboard</h2>
-    {% if logged %}
-      <a href="{{ url_for('dashboard') }}">Home</a>
-      <a href="{{ url_for('stats') }}">Stats</a>
-      <a href="{{ url_for('profile') }}">Profile</a>
-      <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('stats') }}">Stats</a>
+    <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+    {% if session.get('role') == 'teacher' %}
       <a href="{{ url_for('createquiz') }}">Create Quiz</a>
-      <a href="{{ url_for('livequiz') }}">Live Quiz</a>
-      <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
-      <a href="{{ url_for('front') }}">Home</a>
     {% endif %}
-  </div>
+    <a href="{{ url_for('quizzes') }}">Live Quiz</a>
+    <a href="{{ url_for('profile') }}">Profile</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
 
-  <div class="main-area">
-    <div class="navbar">
-      <div class="left-nav">
-        <div class="menu-icon">☰</div>
-        <div class="site-title">CrackMines</div>
-      </div>
-      <div class="nav-right">
-        {% if not logged %}
-          <a href="{{ url_for('login') }}">Login</a>
-          <a href="{{ url_for('signup') }}" class="btn">Signup</a>
-        {% else %}
-          <span class="user-pill">{{ session.get('name','') }} • {{ session.get('role','') }}</span>
-        {% endif %}
-      </div>
-    </div>
-    <div class="main-content">
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="flash">
-            {% for m in messages %}<div>{{ m }}</div>{% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-      {% block content %}{% endblock %}
-    </div>
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
   </div>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
