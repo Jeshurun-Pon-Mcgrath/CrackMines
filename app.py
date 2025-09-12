@@ -25,7 +25,7 @@ def get_db():
     )
 
 
-# ✅ Mail config (with your password)
+# Mail config (with your password)
 app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
 app.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT", "587"))
 app.config['MAIL_USE_TLS'] = True
